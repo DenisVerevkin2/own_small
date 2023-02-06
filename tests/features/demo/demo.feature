@@ -2,7 +2,7 @@ Feature: Demo feature
 
     Just first *.feature (example)
 
-    @demo
+    #@demo
     Scenario Outline: Demo Outline
 
         Given Google page is opened
