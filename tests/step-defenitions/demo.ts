@@ -1,4 +1,5 @@
 import { Given, When, Then } from "@wdio/cucumber-framework";
+import pages from "../pages/pages-enum.js"
 import chai from "chai";
 
 // =========================GIVEN SECTION=================================
@@ -20,14 +21,14 @@ Given(/^A default webpage is opened$/, async function () {
 });
 
 Given(
-  "A webpage with URL {string} with login and password {string} and {string} is opened",
-  async function (url, login, password) {
+  "A webpage with login {string} and password {string} is opened",
+  async function (login, password) {
     await browser.maximizeWindow();
-    await browser.url(url);
+    await browser.url("/");
     await browser.setTimeout({ implicit: 15000, pageLoad: 10000 });
-    await $(`#user-name`).setValue(login);
-    await $(`#password`).setValue(password);
-    await $(`#login-button`).click();
+    await $(pages.loginPage.usernameField).setValue(login);
+    await $(pages.loginPage.passwordField).setValue(password);
+    await $(pages.loginPage.loginButton).click();
   }
 );
 
@@ -123,11 +124,22 @@ When("I click on element with locator {string}", async function (elemLocator) {
   await $(`${elemLocator}`).click();
 });
 
+When("I click on element {string}.{string}", async function (pageName, elemLocator) {
+  await $(`${pages[pageName][elemLocator]}`).click();
+});
+
 When(
   "I click on element with locator {string} and text {string}",
   async function (elemLocator, elemText) {
     await $(`${elemLocator}=${elemText}`).click();
   }
+);
+
+When(
+    "I click on element {string}.{string} with text {string}",
+    async function (pageName, elementName, elemText) {
+      await $(`${pages[pageName][elementName]}=${elemText}`).click();
+    }
 );
 
 When("Perform web interactions alerts {string}", async function (alertAction) {
@@ -148,9 +160,9 @@ When("Perform web interactions alerts {string}", async function (alertAction) {
 });
 
 When(
-  "I upload file {string} with element {string}",
-  async function (fileLocator, uploadElement) {
-    await $(uploadElement).setValue(`${process.cwd()}/${fileLocator}`);
+  "I upload file {string} with element {string}.{string}",
+  async function (fileLocator, pageName, uploadElement) {
+    await $(pages[pageName][uploadElement]).setValue(`${process.cwd()}/${fileLocator}`);
   }
 );
 
@@ -187,9 +199,9 @@ When(
 // =========================THEN SECTION=================================
 
 Then(
-  "I expect that text of element with locator {string} is equal to {string}",
-  async function (elemLocator, elemText) {
-    chai.expect(await $(elemLocator).getText()).to.equal(elemText);
+  "I expect that text of element {string}.{string} is equal to {string}",
+  async function (pageName, elemLocator, elemText) {
+    chai.expect(await $(pages[pageName][elemLocator]).getText()).to.equal(elemText);
   }
 );
 
@@ -205,16 +217,16 @@ Then(/^URL should match (.*)$/, async function (expectedURL) {
 });
 
 Then(
-  "I expect that number of elements with locator {string} on the page is {int}",
-  async function (elemLocator, numberOfItems) {
-    chai.expect(await $$(elemLocator).length).to.equal(numberOfItems);
+  "I expect that number of elements {string}.{string} on the page is {int}",
+  async function (pageName, elemLocator, numberOfItems) {
+    chai.expect(await $$(pages[pageName][elemLocator]).length).to.equal(numberOfItems);
   }
 );
 
 Then(
-  "I expect that each element value with locator {string} is {word} than {float}",
-  async function (elemLocator, arg, minPrice) {
-    let elemArray = await $$(elemLocator);
+  "I expect that each element value {string}.{string} is {word} than {float}",
+  async function (pageName, elemLocator, arg, minPrice) {
+    let elemArray = await $$(pages[pageName][elemLocator]);
     for (let item of elemArray){
       let price = Number((await item.getText()).replace('$',''));
       chai.expect(price).to.be[arg](minPrice);
